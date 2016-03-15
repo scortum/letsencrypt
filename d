@@ -29,7 +29,7 @@ run() {
   docker rm $APP_NAME || true
   docker run -d --name $APP_NAME \
              -v /etc/localtime:/etc/localtime:ro \
-             -v /tmp/$APP_NAME:/certs \
+             -v /data/$APP_NAME/certs:/certs \
              -p 80:80   \
              -p 443:443 \
              $APP_NAME
@@ -42,7 +42,7 @@ enter() {
 shell() {
   docker run -it --rm \
              -v /etc/localtime:/etc/localtime:ro \
-             -v /tmp/$APP_NAME:/certs \
+             -v /data/$APP_NAME/certs:/certs \
              -p 80:80   \
              -p 443:443 \
              $APP_NAME sh
