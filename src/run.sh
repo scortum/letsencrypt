@@ -1,4 +1,4 @@
-#!/bin/sh -xe
+#!/bin/sh -x
 
 
 ls /certs | while read in; 
@@ -7,7 +7,7 @@ do
   EMAIL=mail@${DOMAIN}
 
   # if domain contains a dot
-  if [ -z "${domain//[^.]/}" ]; then 
+  if host "${DOMAIN}"; then 
 
     letsencrypt certonly --standalone      \
                          --email ${EMAIL}  \
