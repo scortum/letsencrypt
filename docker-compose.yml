@@ -1,0 +1,13 @@
+version: "2"
+
+services:
+
+    letsencrypt:
+        image: scortum/letsencrypt
+        container_name: letsencrypt
+        volumes:
+            - /data/scortum-letsencrypt/certs:/certs
+        ports:
+            - 80:80 
+            - 443:443 
+

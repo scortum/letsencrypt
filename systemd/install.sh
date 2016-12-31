@@ -3,17 +3,15 @@
 IMAGE_NAME=scortum/letsencrypt
 VERSION=latest
 DOCKER_CONTAINER_NAME=scortum-letsencrypt
-
-
-
+WEBSERVER_IMAGE=nginx-proxy
 
 
 cat > /etc/default/${DOCKER_CONTAINER_NAME} << EOF
 DOCKER_IMAGE=${IMAGE_NAME}:${VERSION}
 DOCKER_CONTAINER_NAME=${DOCKER_CONTAINER_NAME}
 LOCAL_DIR=/data/${DOCKER_CONTAINER_NAME}
+WEBSERVER_IMAGE=${WEBSERVER_IMAGE}
 EOF
-
 
 cat > /lib/systemd/system/${DOCKER_CONTAINER_NAME}.timer << EOF
 [Unit]
@@ -21,7 +19,8 @@ Description=Every Other Month
 
 [Timer]
 # https://www.freedesktop.org/software/systemd/man/systemd.time.html
-OnCalendar=monthly
+OnCalendar=weekly
+# OnCalendar=monthly
 # OnCalendar=*-0/2-01 00:00:00
 
 Unit=${DOCKER_CONTAINER_NAME}.service
@@ -45,6 +44,7 @@ EnvironmentFile=/etc/default/${DOCKER_CONTAINER_NAME}
 ExecStartPre=-/usr/bin/docker kill \${DOCKER_CONTAINER_NAME}
 ExecStartPre=-/usr/bin/docker rm \${DOCKER_CONTAINER_NAME}
 ExecStartPre=/usr/bin/docker pull \${DOCKER_IMAGE}
+ExecStartPre=/usr/bin/docker stop \${WEBSERVER_IMAGE}
 ExecStart=/usr/bin/docker run --name \${DOCKER_CONTAINER_NAME}      \
                               -p 80:80                              \
                               -p 443:443                            \
@@ -52,6 +52,7 @@ ExecStart=/usr/bin/docker run --name \${DOCKER_CONTAINER_NAME}      \
                               -v /etc/localtime:/etc/localtime:ro   \
                               \${DOCKER_IMAGE}
 ExecStop=/usr/bin/docker stop --time=10 \${DOCKER_CONTAINER_NAME} 
+ExecStopPost=/usr/bin/docker start \${WEBSERVER_IMAGE}
 
 [Install]
 WantedBy=multi-user.target
